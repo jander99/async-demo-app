@@ -45,68 +45,80 @@ public class FakeOrchestrationService {
             throw new Exception("Derped the input somehow!");
         }
 
-        List<Long> prefetchLatencies = null;
-        List<Long> geocodeLatencies = null;
-        List<Long> minimapFetchLatencies;
+        List<Long> fastService1Latencies = null;
+        List<Long> fastService2Latencies = null;
+        List<Long> fastService3Latencies = null;
 
-        List<CompletableFuture<Long>> asyncPrefetchLatencies = null;
-        List<CompletableFuture<Long>> asyncGeocodeLatencies = null;
+        List<CompletableFuture<Long>> asyncFastService1Latencies = null;
+        List<CompletableFuture<Long>> asyncFastService2Latencies = null;
 
 
-        // Return a list of latencies of the 'Minimap' call
+        /**
+         * This is the first Service call. It will collect immediately which should block
+         * execution of the rest of the HTTP request thread.
+         */
         StopWatch stopWatch = new StopWatch();
-        stopWatch.start("FastCall1");
+        stopWatch.start("FastService1Call");
         switch (fastService1Type) {
             case "Sequential":
-                prefetchLatencies = fastService.callFastService(numIterations, FS1_MIN, FS1_MAX, false);
+                fastService1Latencies = fastService.callFastService(numIterations, FS1_MIN, FS1_MAX, false);
                 break;
             case "Parallel":
-                prefetchLatencies = fastService.callFastService(numIterations, FS1_MIN, FS1_MAX, true);
+                fastService1Latencies = fastService.callFastService(numIterations, FS1_MIN, FS1_MAX, true);
                 break;
             case "Async":
-                asyncPrefetchLatencies = fastService.callFastServiceAsync(numIterations, FS1_MIN, FS1_MAX, false);
+                asyncFastService1Latencies = fastService.callFastServiceAsync(numIterations, FS1_MIN, FS1_MAX, false);
                 break;
             case "AsyncPooled":
-                asyncPrefetchLatencies = fastService.callFastServiceAsync(numIterations, FS1_MIN, FS1_MAX, true);
+                asyncFastService1Latencies = fastService.callFastServiceAsync(numIterations, FS1_MIN, FS1_MAX, true);
                 break;
         }
         stopWatch.stop();
         long fastService1ExecTime = stopWatch.getLastTaskTimeMillis();
 
-        // Collect these immediately.
         stopWatch.start("FastService1Collector");
-        if (Objects.isNull(prefetchLatencies) && asyncPrefetchLatencies != null) {
-            prefetchLatencies = collectCompletedFutures(asyncPrefetchLatencies);
+        if (Objects.isNull(fastService1Latencies) && Objects.nonNull(asyncFastService1Latencies)) {
+            fastService1Latencies = collectCompletedFutures(asyncFastService1Latencies);
         }
         stopWatch.stop();
         long fastService1Collector = stopWatch.getLastTaskTimeMillis();
+        /** End First Service Call */
 
 
-
-        // Return a list of latencies of the 'Taxware' call
-        stopWatch.start("FastCall2");
+        /**
+         * This is the second Service call. It will be collected after the next section of code is completed,
+         * to simulate what happens when a block of code is allowed to continue asynchronously while another
+         * part of the HTTP thread is processing. If any set of instructions does not rely on Service 2
+         * to be complete before starting, this is the pattern you want to use.
+         */
+        stopWatch.start("FastService2Call");
         switch (fastService2Type) {
             case "Sequential":
-                geocodeLatencies = fastService.callFastService(numIterations, FS2_MIN, FS2_MAX, false);
+                fastService2Latencies = fastService.callFastService(numIterations, FS2_MIN, FS2_MAX, false);
                 break;
             case "Parallel":
-                geocodeLatencies = fastService.callFastService(numIterations, FS2_MIN, FS2_MAX, true);
+                fastService2Latencies = fastService.callFastService(numIterations, FS2_MIN, FS2_MAX, true);
                 break;
             case "Async":
-                asyncGeocodeLatencies = fastService.callFastServiceAsync(numIterations, FS2_MIN, FS2_MAX, false);
+                asyncFastService2Latencies = fastService.callFastServiceAsync(numIterations, FS2_MIN, FS2_MAX, false);
                 break;
             case "AsyncPooled":
-                asyncGeocodeLatencies = fastService.callFastServiceAsync(numIterations, FS2_MIN, FS2_MAX, true);
+                asyncFastService2Latencies = fastService.callFastServiceAsync(numIterations, FS2_MIN, FS2_MAX, true);
                 break;
         }
         stopWatch.stop();
         long fastService2ExecTime = stopWatch.getLastTaskTimeMillis();
+        /** End Second Service Call */
 
 
-        // Begin the loop
-
+        /**
+         * This is the next block where we want to call a third Fast Service and then a Slow service in
+         * sequence. This Fast Service is hardcoded to run sequentially, causing the Slow service to wait
+         * until it has finished. Depending on the method that Fast Service 2 took, there could also be
+         * processing still occuring asynchronously with this block of code.
+         */
         stopWatch.start("FastCall3");
-        minimapFetchLatencies = fastService.callFastService(numIterations, FS3_MIN, FS3_MAX, false);
+        fastService3Latencies = fastService.callFastService(numIterations, FS3_MIN, FS3_MAX, false);
         stopWatch.stop();
         long fastService3ExecTime = stopWatch.getLastTaskTimeMillis();
 
@@ -114,60 +126,69 @@ public class FakeOrchestrationService {
         long slowCallTime = slowService.callService(1, SS_MIN, SS_MAX, SS_MIN/2, SS_MAX);
         stopWatch.stop();
         long slowCallExecTime = stopWatch.getLastTaskTimeMillis();
+        /** End Third Fast Service Call & Slow Service Call */
 
-        // End loop
 
-        // for Async returns here
+        /**
+         * Now that Fast Service 3 and the Slow Service have completed, we want to collect the results
+         * of Fast Service 2, provided that it was run Asynchronously.
+         */
         stopWatch.start("FastService2Collector");
-        if (Objects.isNull(geocodeLatencies) && asyncGeocodeLatencies != null) {
-            geocodeLatencies = collectCompletedFutures(asyncGeocodeLatencies);
+        if (Objects.isNull(fastService2Latencies) && Objects.nonNull(asyncFastService2Latencies)) {
+            fastService2Latencies = collectCompletedFutures(asyncFastService2Latencies);
         }
         stopWatch.stop();
         long fastService2Collector = stopWatch.getLastTaskTimeMillis();
+        /** End Fast Service 2 Async collection */
 
 
-        // Add together all latencies (reducer probably)
-        long prefetchLatency = prefetchLatencies.stream().reduce(Long::sum).orElse(-1L);
-        long geocodeLatency = geocodeLatencies.stream().reduce(Long::sum).orElse(-1L);
-        long minimapFetchLatency = minimapFetchLatencies.stream().reduce(Long::sum).orElse(-1L);
+        /**
+         * Let's build the total latency of the 3 Fast Services
+         */
+        if(Objects.nonNull(fastService1Latencies) && Objects.nonNull(fastService2Latencies) && Objects.nonNull(fastService3Latencies)) {
+            long fastService1TotalLatency = fastService1Latencies.stream().reduce(Long::sum).orElse(-1L);
+            long fastService2TotalLatency = fastService2Latencies.stream().reduce(Long::sum).orElse(-1L);
+            long fastService3TotalLatency = fastService3Latencies.stream().reduce(Long::sum).orElse(-1L);
 
-        AsyncReply.InnerReply slowCall = AsyncReply.InnerReply
-                .builder()
-                .execTime(slowCallExecTime)
-                .latency(slowCallTime)
-                .type("Sequential")
-                .build();
+            AsyncReply.InnerReply slowCall = AsyncReply.InnerReply
+                    .builder()
+                    .execTime(slowCallExecTime)
+                    .latency(slowCallTime)
+                    .type("Sequential")
+                    .build();
 
-        AsyncReply.InnerReply fastService1 = AsyncReply.InnerReply
-                .builder()
-                .execTime(fastService1ExecTime+fastService1Collector)
-                .latency(prefetchLatency)
-                .type(fastService1Type)
-                .build();
+            AsyncReply.InnerReply fastService1 = AsyncReply.InnerReply
+                    .builder()
+                    .execTime(fastService1ExecTime+fastService1Collector)
+                    .latency(fastService1TotalLatency)
+                    .type(fastService1Type)
+                    .build();
 
-        AsyncReply.InnerReply fastService2 = AsyncReply.InnerReply
-                .builder()
-                .execTime(fastService2ExecTime+fastService2Collector)
-                .latency(geocodeLatency)
-                .type(fastService2Type)
-                .build();
+            AsyncReply.InnerReply fastService2 = AsyncReply.InnerReply
+                    .builder()
+                    .execTime(fastService2ExecTime+fastService2Collector)
+                    .latency(fastService2TotalLatency)
+                    .type(fastService2Type)
+                    .build();
 
-        AsyncReply.InnerReply fastService3 = AsyncReply.InnerReply
-                .builder()
-                .execTime(fastService3ExecTime)
-                .latency(minimapFetchLatency)
-                .type("Sequential")
-                .build();
+            AsyncReply.InnerReply fastService3 = AsyncReply.InnerReply
+                    .builder()
+                    .execTime(fastService3ExecTime)
+                    .latency(fastService3TotalLatency)
+                    .type("Sequential")
+                    .build();
 
 
-        return AsyncReply.builder()
-                .fastCall1(fastService1)
-                .fastCall2(fastService2)
-                .fastCall3(fastService3)
-                .slowCall(slowCall)
-                .totalExecTime(slowCallExecTime + fastService1ExecTime + fastService2ExecTime + fastService3ExecTime)
-                .totalLatency(prefetchLatency + geocodeLatency + minimapFetchLatency + slowCallTime).build();
-
+            return AsyncReply.builder()
+                    .fastCall1(fastService1)
+                    .fastCall2(fastService2)
+                    .fastCall3(fastService3)
+                    .slowCall(slowCall)
+                    .totalExecTime(slowCallExecTime + fastService1ExecTime + fastService2ExecTime + fastService3ExecTime)
+                    .totalLatency(fastService1TotalLatency + fastService2TotalLatency + fastService3TotalLatency + slowCallTime).build();
+        } else {
+            throw new Exception("Unable to somehow build the proper model object to send you.");
+        }
     }
 
     private boolean checkServiceType(String serviceType) {
