@@ -10,13 +10,12 @@ class BasicSimulation extends Simulation {
   val r = scala.util.Random
   val requestHeaders = Map(
     HttpHeaderNames.ContentType -> HttpHeaderValues.ApplicationJson,
-    HttpHeaderNames.Accept -> HttpHeaderValues.ApplicationJson,
-    "Keep-Alive" -> "150"
+    HttpHeaderNames.Accept -> HttpHeaderValues.ApplicationJson
   )
   val testingUrl = "http://localhost:8080/"
   var numUsers: Int = 50
-  var rampUpSeconds: Int = 60
-  var constantSeconds: Int = 30
+  var rampUpSeconds: Int = 5
+  var constantSeconds: Int = 5
 
   def generateScenario(fs1type: String, fs2type: String): ScenarioBuilder = {
     scenario(s"${fs1type}/${fs2type} Scenario")
