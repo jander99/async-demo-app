@@ -32,3 +32,4 @@ out/
 .vscode/
 
 tmp/**
+gatling-reports/**

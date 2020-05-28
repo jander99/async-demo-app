@@ -14,12 +14,11 @@ class BasicSimulation extends Simulation {
   )
   val testingUrl = "http://localhost:8080/"
   var numUsers: Int = 50
-  var rampUpSeconds: Int = 5
-  var constantSeconds: Int = 5
+  var rampUpSeconds: Int = 30
 
   def generateScenario(fs1type: String, fs2type: String): ScenarioBuilder = {
     scenario(s"${fs1type}/${fs2type} Scenario")
-      .exec(http(s"FS1: ${fs1type} / FS2: ${fs2type} / FS3: Sequential Request")
+      .exec(http(s"${fs1type}/${fs2type}")
         .post(testingUrl)
         .headers(requestHeaders)
         .body(StringBody(session => s"""{\"numIterations\": ${generateRandomIterations()}, \"fastService1Type\": \"${fs1type}\", \"fastService2Type\": \"${fs2type}\"}""")).asJson
@@ -51,6 +50,4 @@ class BasicSimulation extends Simulation {
     }
     rando
   }
-
-
 }

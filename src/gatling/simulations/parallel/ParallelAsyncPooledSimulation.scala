@@ -8,6 +8,6 @@ import scala.concurrent.duration._
 
 class ParallelAsyncPooledSimulation extends BasicSimulation {
 
-  val sequentialScenario: ScenarioBuilder = generateScenario("Parallel", "Sequential")
+  val sequentialScenario: ScenarioBuilder = generateScenario("Parallel", "AsyncPooled")
   setUp(sequentialScenario.inject(constantUsersPerSec(numUsers) during (rampUpSeconds seconds)))
 }
