@@ -25,7 +25,7 @@ public class AsyncTestController {
     public ResponseEntity<?> postCommand(@RequestBody AsyncPayload payload) {
 
         try {
-            log.info("Entering Post: {}", objectMapper.writeValueAsString(payload));
+            log.debug("Entering Post: {}", objectMapper.writeValueAsString(payload));
 
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
@@ -35,7 +35,7 @@ public class AsyncTestController {
                     payload.getFastService2Type());
             stopWatch.stop();
             reply.setTotalExecTime(stopWatch.getTotalTimeMillis());
-            log.info("RESPONSE: {}", objectMapper.writeValueAsString(reply));
+            log.debug("RESPONSE: {}", objectMapper.writeValueAsString(reply));
             return ResponseEntity.ok(reply);
         } catch (Exception e) {
             log.error("Wat.", e);
