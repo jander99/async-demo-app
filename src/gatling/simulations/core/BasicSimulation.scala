@@ -14,7 +14,7 @@ class BasicSimulation extends Simulation {
   )
   val testingUrl = "http://localhost:8080/"
   var numUsers: Int = 50
-  var rampUpSeconds: Int = 30
+  var rampUpSeconds: Int = 90
 
   def generateScenario(fs1type: String, fs2type: String): ScenarioBuilder = {
     scenario(s"${fs1type}/${fs2type} Scenario")

@@ -2,7 +2,10 @@ package com.github.jander99.async.demo.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,17 +15,25 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class FakeFastService {
 
-    private final AsyncFakeFastService asyncFakeFastService;
+    private final FakeAsyncFastService fakeAsyncFastService;
+
+    private final RestTemplate restTemplate;
+
+    public FakeFastService(@Qualifier("fastServiceTemplate") RestTemplate restTemplate, FakeAsyncFastService fakeAsyncFastService) {
+        this.restTemplate = restTemplate;
+        this.fakeAsyncFastService = fakeAsyncFastService;
+    }
+
+    private final int port = 8000;
 
     public List<Long> callFastService(int numIterations, int minLatency, int maxLatency, boolean parallel) {
         List<Long> list = generateLatencies(numIterations, minLatency, maxLatency);
         if(parallel) {
-            list.parallelStream().forEach(this::waitFor);
+            list.parallelStream().forEach(this::externalLocalCall);
         } else {
-            list.forEach(this::waitFor);
+            list.forEach(this::externalLocalCall);
         }
         return list;
     }
@@ -31,14 +42,12 @@ public class FakeFastService {
         List<Long> list = generateLatencies(numIterations, minLatency, maxLatency);
         List<CompletableFuture<Long>> asyncList;
         if (isPooled) {
-            asyncList = list.parallelStream().map(asyncFakeFastService::pooledAsyncWait).collect(Collectors.toList());
+            asyncList = list.parallelStream().map(fakeAsyncFastService::pooledAsyncWait).collect(Collectors.toList());
         } else {
-            asyncList = list.parallelStream().map(asyncFakeFastService::asyncWait).collect(Collectors.toList());
+            asyncList = list.parallelStream().map(fakeAsyncFastService::asyncWait).collect(Collectors.toList());
         }
         return asyncList;
     }
-
-
 
     private List<Long> generateLatencies(int num, int min, int max) {
         List<Long> list = new ArrayList<>();
@@ -56,6 +65,14 @@ public class FakeFastService {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             log.error("Thread {} got interrupted.", Thread.currentThread().getName(), e);
+        }
+    }
+
+    private void externalLocalCall(long millis) {
+        try {
+            restTemplate.getForObject(String.format("http://localhost:%s/?t=%s",port,millis),String.class);
+        } catch (RestClientException rce) {
+            log.error("Uh oh.", rce);
         }
     }
 }

@@ -10,6 +10,12 @@ There are four options to explore with this code:
 1. The `@Async` annotation with a custom ThreadPool
 
 
+### A Smol Golang Server ###
+
+In the server directory is a small golang app that can function as a small server. It runs on port 8000. 
+
+Call goserver with a certain latency - `GET http://localhost:8000/?t={latency}`
+
 ### Gatling ### 
 
 This project uses the lkishalmi gatling gradle plugin. Running Gatling is simple. 

@@ -18,17 +18,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FakeOrchestrationService {
 
-    private static final int FS1_MIN = 15;
+    private static final int FS1_MIN = 10;
     private static final int FS1_MAX = 95;
 
     private static final int FS2_MIN = 25;
     private static final int FS2_MAX = 100;
 
-    private static final int FS3_MIN = 10;
+    private static final int FS3_MIN = 8;
     private static final int FS3_MAX = 25;
 
     private static final int SS_MIN = 100;
-    private static final int SS_MAX = 350;
+    private static final int SS_MAX = 320;
 
 
     private static final List<String> serviceTypes = Arrays.asList("Async", "Parallel", "Sequential", "AsyncPooled");
@@ -123,7 +123,7 @@ public class FakeOrchestrationService {
         long fastService3ExecTime = stopWatch.getLastTaskTimeMillis();
 
         stopWatch.start("SlowCall");
-        long slowCallTime = slowService.callService(1, SS_MIN, SS_MAX, SS_MIN/2, SS_MAX);
+        long slowCallTime = slowService.callService(SS_MIN, SS_MAX, SS_MIN/2, SS_MAX);
         stopWatch.stop();
         long slowCallExecTime = stopWatch.getLastTaskTimeMillis();
         /** End Third Fast Service Call & Slow Service Call */

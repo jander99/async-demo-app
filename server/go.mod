@@ -1,5 +1,8 @@
-module github.com/jander99/latent-server
+module github.com/jander99/goserver
 
 go 1.14
 
-require github.com/gorilla/mux v1.7.4
+require (
+	github.com/gorilla/handlers v1.4.2
+	github.com/gorilla/mux v1.7.4
+)
