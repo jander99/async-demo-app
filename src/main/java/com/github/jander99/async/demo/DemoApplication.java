@@ -29,9 +29,9 @@ public class DemoApplication {
     @Bean("FastServiceThreadPool")
     public Executor fastServiceThreadPool() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(50);
+        executor.setCorePoolSize(100);
         executor.setMaxPoolSize(500);
-        executor.setQueueCapacity(5000);
+        executor.setQueueCapacity(10000);
         executor.setThreadNamePrefix("FastServiceThreadPool-");
         executor.initialize();
         return executor;

@@ -2,12 +2,11 @@ package sequential
 
 import core.BasicSimulation
 import io.gatling.core.Predef._
-import io.gatling.core.structure.ScenarioBuilder
 
 import scala.concurrent.duration._
 
-class SeqentialAsyncSimulation extends BasicSimulation {
+class SequentialSequentialSimulation extends BasicSimulation {
 
-  val sequentialScenario: ScenarioBuilder = generateScenario("Sequential", "Async")
+  val sequentialScenario = generateScenario("Sequential", "Sequential")
   setUp(sequentialScenario.inject(constantUsersPerSec(numUsers) during (rampUpSeconds seconds)))
 }

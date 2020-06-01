@@ -5,6 +5,8 @@ import io.gatling.core.body.StringBody
 import io.gatling.core.structure.ScenarioBuilder
 import io.gatling.http.Predef._
 
+import scala.concurrent.duration._
+
 class BasicSimulation extends Simulation {
 
   val r = scala.util.Random
@@ -14,7 +16,7 @@ class BasicSimulation extends Simulation {
   )
   val testingUrl = "http://localhost:8080/"
   var numUsers: Int = 50
-  var rampUpSeconds: Int = 90
+  var rampUpSeconds: Int = 60
 
   def generateScenario(fs1type: String, fs2type: String): ScenarioBuilder = {
     scenario(s"${fs1type}/${fs2type} Scenario")
@@ -23,6 +25,7 @@ class BasicSimulation extends Simulation {
         .headers(requestHeaders)
         .body(StringBody(session => s"""{\"numIterations\": ${generateRandomIterations()}, \"fastService1Type\": \"${fs1type}\", \"fastService2Type\": \"${fs2type}\"}""")).asJson
         .check(status.is(200)))
+      //.pause(10.seconds)
   }
 
   def generateRandomIterations(): Int = {
@@ -34,19 +37,19 @@ class BasicSimulation extends Simulation {
       rando += r.nextInt(1)
     }
     if (percentile > 25 && percentile <= 50) {
-      rando += r.nextInt(6)
+      rando += r.nextInt(5)
     }
     if (percentile > 50 && percentile <= 75) {
-      rando += r.nextInt(9)
+      rando += r.nextInt(8)
     }
     if (percentile > 75 && percentile <= 90) {
-      rando += r.nextInt(20)
+      rando += r.nextInt(15)
     }
     if (percentile > 90 && percentile <= 99) {
-      rando += r.nextInt(35)
+      rando += r.nextInt(20)
     }
     if (percentile > 99) {
-      rando += r.nextInt(70)
+      rando += r.nextInt(50)
     }
     rando
   }

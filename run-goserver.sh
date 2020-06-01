@@ -6,6 +6,6 @@ ulimit -Sn 10000
 
 cd server || exit 1
 go build
-./goserver
+nice ./goserver
 
 cd "${CURR_DIR}" || exit 1
