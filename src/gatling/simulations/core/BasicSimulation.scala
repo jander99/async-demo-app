@@ -18,7 +18,7 @@ class BasicSimulation extends Simulation {
   // val testingUrl = "http://localhost:8080/"
   val testingUrl = "https://async-test.apps-np.homedepot.com"
   var numUsers: Int = 50
-  var rampUpSeconds: Int = 30
+  var rampUpSeconds: Int = 90
 
   def generateScenario(fs1type: String, fs2type: String): ScenarioBuilder = {
     scenario(s"${fs1type}/${fs2type} Scenario")
@@ -39,19 +39,19 @@ class BasicSimulation extends Simulation {
       rando += r.nextInt(1)
     }
     if (percentile > 25 && percentile <= 50) {
-      rando += r.nextInt(5)
+      rando += r.nextInt(4)
     }
     if (percentile > 50 && percentile <= 75) {
-      rando += r.nextInt(8)
+      rando += r.nextInt(6)
     }
     if (percentile > 75 && percentile <= 90) {
-      rando += r.nextInt(15)
+      rando += r.nextInt(10)
     }
     if (percentile > 90 && percentile <= 99) {
-      rando += r.nextInt(20)
+      rando += r.nextInt(18)
     }
     if (percentile > 99) {
-      rando += r.nextInt(50)
+      rando += r.nextInt(35)
     }
     rando
   }

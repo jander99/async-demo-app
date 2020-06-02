@@ -3,10 +3,10 @@
 # shellcheck disable=SC2054
 # shellcheck disable=SC2039
 # shellcheck disable=SC2034
-declare -a async_tests=("AsyncAsyncSimulation" "AsyncAsyncPooledSimulation" "AsyncParallelSimulation" "AsyncSequentialSimulation")
-declare -a pooled_tests=("AsyncPooledAsyncPooledSimulation" "AsyncPooledAsyncSimulation" "AsyncPooledParallelSimulation" "AsyncPooledSequentialSimulation")
-declare -a parallel_tests=("ParallelAsyncPooledSimulation" "ParallelAsyncSimulation" "ParallelParallelSimulation" "ParallelSequentialSimulation")
-declare -a sequential_tests=("SequentialAsyncPooledSimulation" "SequentialAsyncSimulation" "SequentialParallelSimulation" "SequentialSequentialSimulation")
+declare -a async_tests=("AsyncAsyncSimulation" "AsyncAsyncPooledSimulation" "AsyncParallelSimulation") # "AsyncSequentialSimulation")
+declare -a pooled_tests=("AsyncPooledAsyncPooledSimulation" "AsyncPooledAsyncSimulation" "AsyncPooledParallelSimulation") # "AsyncPooledSequentialSimulation")
+declare -a parallel_tests=("ParallelAsyncPooledSimulation" "ParallelAsyncSimulation" "ParallelParallelSimulation") # "ParallelSequentialSimulation")
+declare -a sequential_tests=("SequentialAsyncPooledSimulation" "SequentialAsyncSimulation" "SequentialParallelSimulation") # "SequentialSequentialSimulation")
 
 runTest() {
   type=$1

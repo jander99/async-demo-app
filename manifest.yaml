@@ -3,7 +3,7 @@ applications:
   - name: async-test
     routes:
       - route: async-test.apps-np.homedepot.com
-    instances: 2
+    instances: 4
     memory: 1G
     buildpacks:
       - https://github.com/cloudfoundry/java-buildpack.git
@@ -15,9 +15,9 @@ applications:
       JBP_CONFIG_JMX: '{enabled: true}'
       FS1_MIN: 0
       FS1_MAX: 25
-      FS2_MIN: 10
-      FS2_MAX: 40
+      FS2_MIN: 5
+      FS2_MAX: 30
       FS3_MIN: 0
       FS3_MAX: 10
-      SS_MIN: 75
-      SS_MAX: 300
+      SS_MIN: 40
+      SS_MAX: 250
