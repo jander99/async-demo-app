@@ -1,0 +1,10 @@
+---
+applications:
+  - name: goserver
+    routes:
+      - route: goserver.apps-np.homedepot.com
+    path: .
+    memory: 64M
+    instances: 2
+    buildpacks:
+      - https://github.com/cloudfoundry/go-buildpack.git

@@ -7,6 +7,7 @@ import io.gatling.http.Predef._
 
 import scala.concurrent.duration._
 
+
 class BasicSimulation extends Simulation {
 
   val r = scala.util.Random
@@ -14,9 +15,10 @@ class BasicSimulation extends Simulation {
     HttpHeaderNames.ContentType -> HttpHeaderValues.ApplicationJson,
     HttpHeaderNames.Accept -> HttpHeaderValues.ApplicationJson
   )
-  val testingUrl = "http://localhost:8080/"
+  // val testingUrl = "http://localhost:8080/"
+  val testingUrl = "https://async-test.apps-np.homedepot.com"
   var numUsers: Int = 50
-  var rampUpSeconds: Int = 60
+  var rampUpSeconds: Int = 30
 
   def generateScenario(fs1type: String, fs2type: String): ScenarioBuilder = {
     scenario(s"${fs1type}/${fs2type} Scenario")

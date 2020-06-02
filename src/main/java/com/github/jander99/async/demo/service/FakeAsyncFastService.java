@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,10 +20,12 @@ public class FakeAsyncFastService {
 
     private final RestTemplate restTemplate;
 
-    private final int port = 8000;
+    private final String goserverLocation;
 
-    public FakeAsyncFastService(@Qualifier("asyncFastServiceTemplate") RestTemplate restTemplate) {
+    public FakeAsyncFastService(@Qualifier("asyncFastServiceTemplate") RestTemplate restTemplate,
+                                @Value("${goserver.path}") String goserverLocation) {
         this.restTemplate = restTemplate;
+        this.goserverLocation = goserverLocation;
     }
 
     @Async
@@ -46,10 +50,14 @@ public class FakeAsyncFastService {
     }
 
     private void externalLocalCall(long millis) {
+        StopWatch watch = new StopWatch("RestTemplate");
+        watch.start();
         try {
-            restTemplate.getForObject(String.format("http://localhost:%s/?t=%s",port,millis),String.class);
+            String url = String.format(goserverLocation + "/?t=%s",millis);
+            restTemplate.getForObject(url,String.class);
         } catch (RestClientException rce) {
             log.error("Uh oh.", rce);
         }
+        watch.stop();
     }
 }

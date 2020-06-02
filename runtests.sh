@@ -5,7 +5,7 @@
 # shellcheck disable=SC2034
 declare -a async_tests=("AsyncAsyncSimulation" "AsyncAsyncPooledSimulation" "AsyncParallelSimulation" "AsyncSequentialSimulation")
 declare -a pooled_tests=("AsyncPooledAsyncPooledSimulation" "AsyncPooledAsyncSimulation" "AsyncPooledParallelSimulation" "AsyncPooledSequentialSimulation")
-declare -a parallel_tests=("ParallelAsyncPooledSimulation" "ParallelAsyncSimulation" "ParallelParallelSimulation" "ParallelSeqentialSimulation")
+declare -a parallel_tests=("ParallelAsyncPooledSimulation" "ParallelAsyncSimulation" "ParallelParallelSimulation" "ParallelSequentialSimulation")
 declare -a sequential_tests=("SequentialAsyncPooledSimulation" "SequentialAsyncSimulation" "SequentialParallelSimulation" "SequentialSequentialSimulation")
 
 runTest() {
@@ -13,7 +13,7 @@ runTest() {
   path=$2
   gatling_cmd="./gradlew gatlingRun-$1.$2 --rerun-tasks"
   echo "Running Gatling for ${type} ${path}"
-  eval "nice sh $gatling_cmd > /dev/null 2>&1"
+  eval "sh $gatling_cmd > /dev/null 2>&1"
 }
 
 echo "Cleaning up from previous tests"

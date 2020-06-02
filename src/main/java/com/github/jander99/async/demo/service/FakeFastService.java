@@ -1,9 +1,10 @@
 package com.github.jander99.async.demo.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,12 +22,15 @@ public class FakeFastService {
 
     private final RestTemplate restTemplate;
 
-    public FakeFastService(@Qualifier("fastServiceTemplate") RestTemplate restTemplate, FakeAsyncFastService fakeAsyncFastService) {
+    private final String goserverLocation;
+
+    public FakeFastService(@Qualifier("fastServiceTemplate") RestTemplate restTemplate,
+                           FakeAsyncFastService fakeAsyncFastService,
+                           @Value("${goserver.path}") String goserverLocation) {
         this.restTemplate = restTemplate;
         this.fakeAsyncFastService = fakeAsyncFastService;
+        this.goserverLocation = goserverLocation;
     }
-
-    private final int port = 8000;
 
     public List<Long> callFastService(int numIterations, int minLatency, int maxLatency, boolean parallel) {
         List<Long> list = generateLatencies(numIterations, minLatency, maxLatency);
@@ -69,10 +73,14 @@ public class FakeFastService {
     }
 
     private void externalLocalCall(long millis) {
+        StopWatch watch = new StopWatch("RestTemplate");
+        watch.start();
         try {
-            restTemplate.getForObject(String.format("http://localhost:%s/?t=%s",port,millis),String.class);
+            String url = String.format(goserverLocation + "/?t=%s",millis);
+            restTemplate.getForObject(url,String.class);
         } catch (RestClientException rce) {
             log.error("Uh oh.", rce);
         }
+        watch.stop();
     }
 }

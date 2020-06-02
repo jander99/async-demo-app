@@ -1,0 +1,23 @@
+---
+applications:
+  - name: async-test
+    routes:
+      - route: async-test.apps-np.homedepot.com
+    instances: 2
+    memory: 1G
+    buildpacks:
+      - https://github.com/cloudfoundry/java-buildpack.git
+    path: ./build/libs/async-demo-app-1.0.jar
+    env:
+      SPRING_PROFILES_ACTIVE: thdcf
+      JBP_CONFIG_OPEN_JDK_JRE: "[jre: {version: 11.+}]"
+      TZ: America/New_York
+      JBP_CONFIG_JMX: '{enabled: true}'
+      FS1_MIN: 0
+      FS1_MAX: 25
+      FS2_MIN: 10
+      FS2_MAX: 40
+      FS3_MIN: 0
+      FS3_MAX: 10
+      SS_MIN: 75
+      SS_MAX: 300

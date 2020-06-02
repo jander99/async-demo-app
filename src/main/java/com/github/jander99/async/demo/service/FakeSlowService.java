@@ -3,7 +3,9 @@ package com.github.jander99.async.demo.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -17,11 +19,14 @@ public class FakeSlowService {
 
     private final RestTemplate restTemplate;
 
-    public FakeSlowService(@Qualifier("slowTemplate") RestTemplate restTemplate) {
+    private final String goserverLocation;
+
+    public FakeSlowService(@Qualifier("slowTemplate") RestTemplate restTemplate,
+                           @Value("${goserver.path}") String goserverLocation) {
         this.restTemplate = restTemplate;
+        this.goserverLocation = goserverLocation;
     }
 
-    private final int port = 8000;
 
     public long callService(int primaryMinLatency, int primaryMaxLatency, int failoverMinLatency, int failoverMaxLatency) {
 
@@ -39,10 +44,14 @@ public class FakeSlowService {
     }
 
     private void externalLocalCall(long millis) {
+        StopWatch watch = new StopWatch("RestTemplate");
+        watch.start();
         try {
-            restTemplate.getForObject(String.format("http://localhost:%s/?t=%s",port,millis),String.class);
+            String url = String.format(goserverLocation + "/?t=%s",millis);
+            restTemplate.getForObject(url,String.class);
         } catch (RestClientException rce) {
             log.error("Slow Service derped: {}", rce.getMessage());
         }
+        watch.stop();
     }
 }

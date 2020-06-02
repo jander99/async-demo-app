@@ -10,15 +10,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @SpringBootApplication(proxyBeanMethods = false)
 @EnableAsync
-public class DemoApplication {
+public class AsyncDemoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+        SpringApplication.run(AsyncDemoApplication.class, args);
     }
 
     @Bean // The default Task Scheduler for @Async ops
@@ -39,17 +37,17 @@ public class DemoApplication {
 
     @Bean("slowTemplate")
     public RestTemplate slowRestTemplate() {
-        return generateRestTemplate(300,300);
+        return generateRestTemplate(500,500);
     }
 
     @Bean("fastServiceTemplate")
     public RestTemplate fastRestTemplate() {
-        return generateRestTemplate(300, 100);
+        return generateRestTemplate(500, 500);
     }
 
     @Bean("asyncFastServiceTemplate")
     public RestTemplate asyncFastRestTemplate() {
-        return generateRestTemplate(300, 100);
+        return generateRestTemplate(500, 500);
     }
 
     private RestTemplate generateRestTemplate(int readTimeout, int connectTimeout) {

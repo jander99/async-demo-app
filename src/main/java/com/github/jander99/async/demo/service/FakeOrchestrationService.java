@@ -1,8 +1,8 @@
 package com.github.jander99.async.demo.service;
 
 import com.github.jander99.async.demo.model.AsyncReply;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -14,26 +14,43 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class FakeOrchestrationService {
 
-    private static final int FS1_MIN = 10;
-    private static final int FS1_MAX = 95;
+    private final FakeFastService fakeFastService;
+    private final FakeSlowService fakeSlowService;
 
-    private static final int FS2_MIN = 25;
-    private static final int FS2_MAX = 100;
-
-    private static final int FS3_MIN = 8;
-    private static final int FS3_MAX = 25;
-
-    private static final int SS_MIN = 100;
-    private static final int SS_MAX = 320;
-
+    private final int fastService1MinLatency, fastService2MinLatency, fastService3MinLatency, slowServiceMinLatency;
+    private final int fastService1MaxLatency, fastService2MaxLatency, fastService3MaxLatency, slowServiceMaxLatency;
 
     private static final List<String> serviceTypes = Arrays.asList("Async", "Parallel", "Sequential", "AsyncPooled");
-    private final FakeFastService fastService;
-    private final FakeSlowService slowService;
+
+    public FakeOrchestrationService(FakeFastService fakeFastService,
+                                    FakeSlowService fakeSlowService,
+                                    @Value("${fast-service-1.min.latency}") int fastService1MinLatency,
+                                    @Value("${fast-service-1.max.latency}") int fastService1MaxLatency,
+                                    @Value("${fast-service-2.min.latency}") int fastService2MinLatency,
+                                    @Value("${fast-service-2.max.latency}") int fastService2MaxLatency,
+                                    @Value("${fast-service-3.min.latency}") int fastService3MinLatency,
+                                    @Value("${fast-service-3.max.latency}") int fastService3MaxLatency,
+                                    @Value("${slow-service.min.latency}") int slowServiceMinLatency,
+                                    @Value("${slow-service.max.latency}") int slowServiceMaxLatency,
+                                    @Value("${service.base.latency}") int baseServiceLatency) {
+        this.fakeFastService = fakeFastService;
+        this.fakeSlowService = fakeSlowService;
+
+        this.fastService1MinLatency = fastService1MinLatency + baseServiceLatency;
+        this.fastService1MaxLatency = fastService1MaxLatency + baseServiceLatency;
+        this.fastService2MinLatency = fastService2MinLatency + baseServiceLatency;
+        this.fastService2MaxLatency = fastService2MaxLatency + baseServiceLatency;
+        this.fastService3MinLatency = fastService3MinLatency + baseServiceLatency;
+        this.fastService3MaxLatency = fastService3MaxLatency + baseServiceLatency;
+        this.slowServiceMinLatency = slowServiceMinLatency + baseServiceLatency;
+        this.slowServiceMaxLatency = slowServiceMaxLatency + baseServiceLatency;
+
+    }
+
+
 
     public AsyncReply makeOrchestratedCall(int numIterations, String fastService1Type, String fastService2Type) throws Exception {
 
@@ -61,16 +78,16 @@ public class FakeOrchestrationService {
         stopWatch.start("FastService1Call");
         switch (fastService1Type) {
             case "Sequential":
-                fastService1Latencies = fastService.callFastService(numIterations, FS1_MIN, FS1_MAX, false);
+                fastService1Latencies = fakeFastService.callFastService(numIterations, fastService1MinLatency, fastService1MaxLatency, false);
                 break;
             case "Parallel":
-                fastService1Latencies = fastService.callFastService(numIterations, FS1_MIN, FS1_MAX, true);
+                fastService1Latencies = fakeFastService.callFastService(numIterations, fastService1MinLatency, fastService1MaxLatency, true);
                 break;
             case "Async":
-                asyncFastService1Latencies = fastService.callFastServiceAsync(numIterations, FS1_MIN, FS1_MAX, false);
+                asyncFastService1Latencies = fakeFastService.callFastServiceAsync(numIterations, fastService1MinLatency, fastService1MaxLatency, false);
                 break;
             case "AsyncPooled":
-                asyncFastService1Latencies = fastService.callFastServiceAsync(numIterations, FS1_MIN, FS1_MAX, true);
+                asyncFastService1Latencies = fakeFastService.callFastServiceAsync(numIterations, fastService1MinLatency, fastService1MaxLatency, true);
                 break;
         }
         stopWatch.stop();
@@ -94,16 +111,16 @@ public class FakeOrchestrationService {
         stopWatch.start("FastService2Call");
         switch (fastService2Type) {
             case "Sequential":
-                fastService2Latencies = fastService.callFastService(numIterations, FS2_MIN, FS2_MAX, false);
+                fastService2Latencies = fakeFastService.callFastService(numIterations, fastService2MinLatency, fastService2MaxLatency, false);
                 break;
             case "Parallel":
-                fastService2Latencies = fastService.callFastService(numIterations, FS2_MIN, FS2_MAX, true);
+                fastService2Latencies = fakeFastService.callFastService(numIterations, fastService2MinLatency, fastService2MaxLatency, true);
                 break;
             case "Async":
-                asyncFastService2Latencies = fastService.callFastServiceAsync(numIterations, FS2_MIN, FS2_MAX, false);
+                asyncFastService2Latencies = fakeFastService.callFastServiceAsync(numIterations, fastService2MinLatency, fastService2MaxLatency, false);
                 break;
             case "AsyncPooled":
-                asyncFastService2Latencies = fastService.callFastServiceAsync(numIterations, FS2_MIN, FS2_MAX, true);
+                asyncFastService2Latencies = fakeFastService.callFastServiceAsync(numIterations, fastService2MinLatency, fastService2MaxLatency, true);
                 break;
         }
         stopWatch.stop();
@@ -118,12 +135,12 @@ public class FakeOrchestrationService {
          * processing still occuring asynchronously with this block of code.
          */
         stopWatch.start("FastCall3");
-        fastService3Latencies = fastService.callFastService(numIterations, FS3_MIN, FS3_MAX, false);
+        fastService3Latencies = fakeFastService.callFastService(numIterations, fastService3MinLatency, fastService3MaxLatency, false);
         stopWatch.stop();
         long fastService3ExecTime = stopWatch.getLastTaskTimeMillis();
 
         stopWatch.start("SlowCall");
-        long slowCallTime = slowService.callService(SS_MIN, SS_MAX, SS_MIN/2, SS_MAX);
+        long slowCallTime = fakeSlowService.callService(slowServiceMinLatency, slowServiceMaxLatency, slowServiceMinLatency /2, slowServiceMaxLatency);
         stopWatch.stop();
         long slowCallExecTime = stopWatch.getLastTaskTimeMillis();
         /** End Third Fast Service Call & Slow Service Call */
