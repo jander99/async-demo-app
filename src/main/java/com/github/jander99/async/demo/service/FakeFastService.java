@@ -46,9 +46,9 @@ public class FakeFastService {
         List<Long> list = generateLatencies(numIterations, minLatency, maxLatency);
         List<CompletableFuture<Long>> asyncList;
         if (isPooled) {
-            asyncList = list.parallelStream().map(fakeAsyncFastService::pooledAsyncWait).collect(Collectors.toList());
+            asyncList = list.stream().map(fakeAsyncFastService::pooledAsyncWait).collect(Collectors.toList());
         } else {
-            asyncList = list.parallelStream().map(fakeAsyncFastService::asyncWait).collect(Collectors.toList());
+            asyncList = list.stream().map(fakeAsyncFastService::asyncWait).collect(Collectors.toList());
         }
         return asyncList;
     }

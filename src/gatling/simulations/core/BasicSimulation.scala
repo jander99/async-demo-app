@@ -5,9 +5,6 @@ import io.gatling.core.body.StringBody
 import io.gatling.core.structure.ScenarioBuilder
 import io.gatling.http.Predef._
 
-import scala.concurrent.duration._
-
-
 class BasicSimulation extends Simulation {
 
   val r = scala.util.Random
