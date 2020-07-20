@@ -2,7 +2,8 @@
 applications:
   - name: goserver
     routes:
-      - route: goserver.apps-np.homedepot.com
+      # - route: goserver.apps-np.homedepot.com
+      - route: goserver.apps.internal
     path: .
     memory: 64M
     instances: 2

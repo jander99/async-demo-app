@@ -32,6 +32,26 @@ func init() {
 
 func main() {
 	router := mux.NewRouter()
-	router.Path("/").HandlerFunc(foo).Methods("GET").Queries("t", "{t}")
+
+	router.
+	Path("/goserver/").
+	Handler(http.HandlerFunc(foo)).
+	Methods("GET").
+	Queries("t", "{t}")
+
+
+	router.PathPrefix("/").Handler(http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(500)
+		return
+	}))
+
+	//
+	//router.Handle("/", handlers.LoggingHandler(os.Stdout,
+	//http.HandlerFunc(foo))).Methods("GET").Queries("t", "{t}")
+	//
+	//router.PathPrefix("/").Handler(handlers.LoggingHandler(os.Stdout,
+	//http.HandlerFunc(foo))).Methods("GET").Queries("t", "{t}")
+
+	// router.Path("/").HandlerFunc(foo).Methods("GET").Queries("t", "{t}")
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }

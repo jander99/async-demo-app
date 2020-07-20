@@ -1,0 +1,8 @@
+---
+applications:
+  - name: jda0041-static
+    routes:
+      - route: async-test.apps-np.homedepot.com/static
+      - route: jda0041-static.apps-np.homedepot.com
+    buildpacks:
+      - https://github.com/cloudfoundry/staticfile-buildpack.git
